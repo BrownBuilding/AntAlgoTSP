@@ -8,9 +8,6 @@ let evapororationrate = 0.05
 class Graph {
 
   constructor(vertexCount, antCount) {
-    /** ob die ameisen dargestellt werden sollen*/
-    this.shouldShowAnts = true
-    this.shouldShowBestSolution = true
     /** Ecken des Graphen*/
     this.vertices = []
     /** distancen zwischen den Ecken (this.getDistance()) */
@@ -196,72 +193,6 @@ class Graph {
     rect(10, 10, width - 20, 10)
     fill(0)
     text(this.shortestDistance, 20, 20)
-  }
-
-  /** malt die eine Lösung als Striche die die Ecken des Graphen verbinden*/
-  drawSolution(solution) {
-    for (let j = 1; j < solution.length; j++) {
-      let v1 = this.vertices[solution[j - 1]]
-      let v2 = this.vertices[solution[j]]
-      line(v1.x, v1.y, v2.x, v2.y)
-      rect(v2.x - 5, v2.y - 5, 10, 10)
-    }
-  }
-
-  drawAnts() {
-    strokeWeight(1)
-    // die restlichen Lösungen malen
-    stroke(0, 0, 0, 20)
-    for (let i = 0; i < this.ants.length; i++) {
-      let solution = this.ants[i].getSolution()
-      this.drawSolution(solution)
-    }
-  }
-
-  /** malt die beste Lösung der Ameisen als einen Grünen Strich zwischen den
-  * Ecken dese Graphen*/
-  drawBestSolution() {
-    // beste Lösung in grün malen
-    stroke(0, 255, 0)
-    strokeWeight(1)
-    this.drawSolution(this.bestSolution)
-  }
-
-  drawVertex(number, vector, color) {
-    fill(color[0], color[1], color[2])
-    stroke(0)
-    strokeWeight(1)
-    ellipse(vector.x, vector.y, VERTEX_RADIUS, VERTEX_RADIUS)
-    fill(0)
-    strokeWeight(0)
-    text(number, vector.x - VERTEX_RADIUS/3, vector.y + VERTEX_RADIUS/4)
-  }
-
-  /**malt die Ecken des Graphen als Kreise mit dem Index der jeweiligen Ecke*/
-  drawVertices() {
-    for (let i = 0; i < this.vertices.length; i++) {
-      let vColor = [255, 255, 255]
-      if (i == this.startingVertex)
-        vColor = [0, 255, 0]
-      this.drawVertex(i, this.vertices[i], vColor)
-    }
-  }
-
-  /** draws the graph with the options that have been specified. */
-  draw() {
-    if (this.shouldShowAnts)
-      this.drawAnts()
-    if (this.shouldShowBestSolution)
-      this.drawBestSolution()
-    this.drawVertices()
-  }
-
-  setShouldShowAnts(should) {
-    this.shouldShowAnts = should
-  }
-
-  setShouldShowBestSolution(should) {
-    this.shouldShowBestSolution = should
   }
 
 }
