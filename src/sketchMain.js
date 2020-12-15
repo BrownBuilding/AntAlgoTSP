@@ -9,7 +9,7 @@ let mainGraph
 let mainGraphRenderer
 
 updateVertexCountLabel = function(count) {
-  vertexCountLabel.innerHTML = "Anzahl der Städte: "+ count +"🏙"
+  vertexCountLabel.innerHTML = "Number of Vertices:\t" + count
 }
 
 reset = function() {
