@@ -1,4 +1,3 @@
-let mainGraph
 let checkbox = document.getElementById("shouldShowAntsBoxID")
 let showBestSolutionCheckBox = document.getElementById("shouldShowBestSolutionBoxID")
 let vertexCountSlider = document.getElementById("vertexCountSliderID")
@@ -6,13 +5,16 @@ let vertexCountLabel = document.getElementById("vertexCountLabelID")
 let resetButton = document.getElementById("resetButtonID")
 let newVertexCount = 20
 let shouldReset = false
-
-updateVertexCountLabel = function(count) {
-  vertexCountLabel.innerHTML = "Anzahl der Städte: "+ count +"🏙"
-}
+let mainGraph
+let mainGraphRenderer
 
 reset = function() {
   mainGraph = new Graph(newVertexCount, 5)
+  mainGraphRenderer.setGraph(mainGraph)
+}
+
+updateVertexCountLabel = function(count) {
+  vertexCountLabel.innerHTML = "Number of Vertices:\t" + count
 }
 
 vertexCountSlider.oninput = function() {
@@ -28,15 +30,16 @@ resetButton.onclick = function() {
 setup = function() {
   updateVertexCountLabel(newVertexCount)
   createCanvas(400, 400)
+  mainGraphRenderer = new GraphRenderer(mainGraph)
   reset()
 }
 
 draw = function() {
   background(220, 220, 255)
   mainGraph.update()
-  mainGraph.draw()
-  mainGraph.setShouldShowAnts(checkbox.checked)
-  mainGraph.setShouldShowBestSolution(showBestSolutionCheckBox.checked)
+  mainGraphRenderer.setShouldDrawSolutions(checkbox.checked)
+  mainGraphRenderer.setShouldDrawBestSolution(showBestSolutionCheckBox.checked)
+  mainGraphRenderer.draw()
   if (shouldReset) {
     reset()
     shouldReset = false

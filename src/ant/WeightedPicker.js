@@ -10,18 +10,16 @@ class WeightedPicker {
     this.elements.push(element)
   }
 
-  /** gibt ein zufälliges Elemt aus. die Wahrscheinlichkeit, dass das Element
-  * ausgegeben wird hängt von der Wahrscheinlichkeit ab, die dem Element
-  * durch das hinzufügen durch WeightedPicker#addProbability() zugeordnet
-  * wurde */
+  /** returns a random element, which was added using `addProbability()`
+  * with the specified probability of that element */
   pick() {
-    // Bestimmen der Summe aller Wahrscheinlichkeiten
+    // determine the sum of all probabilities
     let probSum = 0
     for (let i = 0; i < this.probabilities.length; i++) {
       probSum += this.probabilities[i]
     }
-    // auswählen des Elementes
-    let randomNumber = random(0, probSum)
+    // pick the element
+    let randomNumber = Math.random(0, probSum)
     let prevSum = 0
     for (let i = 0; i < this.probabilities.length; i++) {
       prevSum += this.probabilities[i]

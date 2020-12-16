@@ -5,12 +5,24 @@ const HEIGHT_MARGIN = 20
 let pheromoneWeight = 0.5
 let evapororationrate = 0.05
 
+class Vector {
+
+  constructor(x, y) {
+      this.x = x
+      this.y = y
+  }
+
+  dist(v) {
+    let dx = v.x - this.x
+    let dy = v.y - this.y
+    return Math.sqrt(dx*dx + dy*dy)
+  }
+
+}
+
 class Graph {
 
   constructor(vertexCount, antCount) {
-    /** ob die ameisen dargestellt werden sollen*/
-    this.shouldShowAnts = true
-    this.shouldShowBestSolution = true
     /** Ecken des Graphen*/
     this.vertices = []
     /** distancen zwischen den Ecken (this.getDistance()) */
@@ -27,13 +39,23 @@ class Graph {
     this.bestSolution = [0, 0]
     /** fjsiafiahgoai hoi*/
     this.shortestDistance = Number.MAX_VALUE
-    // hinzüfugen der gewünschten Menge an Ecken
+    // adding the specified amount of vertices to the graph
     for (let i = 0; i < vertexCount; i++) {
       this.addNewVertex()
     }
+    this.calculateDistances()
+    this.calculateHeuristics()
+    this.resetPheromones()
+    // hinzüfugen der gewünschten Anzahl an Ameisen
+    for (let i = 0; i < antCount; i++) {
+      this.ants.push(new Ant(this))
+    }
+  }
+
+  calculateDistances() {
     // vorberechen der Distancen zwischen den Ecken
-    for (let i = 0; i < vertexCount; i++) {
-      for (let j = 0; j < vertexCount; j++) {
+    for (let i = 0; i < this.getVertexCount(); i++) {
+      for (let j = 0; j < this.getVertexCount(); j++) {
         // prüfen dass nicht zwischen einer und demselben Ecke berechnet wird
         if (i != j) {
           let distance = this.getVertex(i).dist(this.getVertex(j))
@@ -41,19 +63,24 @@ class Graph {
         }
       }
     }
-    // vorberechen der Heuristik
-    for (let i = 0; i < vertexCount; i++) {
-      for (let j = 0; j < vertexCount; j++) {
-        // prüfen dass nicht zwischen einer und demselben Ecke berechnet wird
+  }
+
+  calculateHeuristics() {
+    // calculating the heuristic between all the vertices
+    for (let i = 0; i < this.getVertexCount(); i++) {
+      for (let j = 0; j < this.getVertexCount(); j++) {
+        // check if the two vertices are not the same vertex
         if (i != j) {
           let heuristic = this.calculateHeuristic(i, j)
           this.setHeuristic(i, j, heuristic)
         }
       }
     }
-    // setzen der Pheromone auf 0 (0 ist besser als undefined)
-    for (let i = 0; i < vertexCount; i++) {
-      for (let j = 0; j < vertexCount; j++) {
+  }
+
+  resetPheromones() {
+    for (let i = 0; i < this.getVertexCount(); i++) {
+      for (let j = 0; j < this.getVertexCount(); j++) {
         // prüfen dass nicht zwischen einer und demselben Ecke berechnet wird
         if (i != j) {
           let pheromone = 0
@@ -61,23 +88,21 @@ class Graph {
         }
       }
     }
-    // hinzüfugen der gewünschten Anzahl an Ameisen
-    for (let i = 0; i < antCount; i++) {
-      this.ants.push(new Ant(this))
-    }
   }
 
-  /** ob zwei Ecken zu nah aneinader sind */
+  /** check if two vertices are too close to be together */
   doVerticesColide(v1, v2) {
     return v1.dist(v2) < MIN_DISTANCE
   }
 
-  /** fügt eine Ecke dem Graphen hinzu, der nicht zu nah an einer anderen
-  Ecke im Grapehn ist (Graph#doVerticesColide())*/
+  /** adds a new random vertex too the graph, so that it is not too close to
+  any of the existing vertices */
   addNewVertex() {
-    let newVertex = createVector(random(WIDTH_MARGIN, width - WIDTH_MARGIN),
-                                 random(HEIGHT_MARGIN, height - HEIGHT_MARGIN)
+    // create a random vector within the margins
+    let newVertex = new Vector(random(WIDTH_MARGIN, width - WIDTH_MARGIN),
+                               random(HEIGHT_MARGIN, height - HEIGHT_MARGIN)
     )
+    // check if the vertex is too close to any other vertices in the graph
     let doesIntersect = false
     for (let i = 0; i < this.vertices.length; i++) {
       if (this.doVerticesColide(newVertex, this.vertices[i])) {
@@ -85,11 +110,12 @@ class Graph {
         break;
       }
     }
-    if (doesIntersect) {
+    if (doesIntersect)
+    // it does not intersect any other vertices -> add vertex
       this.addNewVertex()
-    } else {
+    else
+    // it does intersect -> repeat
       this.vertices.push(newVertex)
-    }
   }
 
   getStartingVertexIndex() {
@@ -153,15 +179,12 @@ class Graph {
   }
 
   update() {
-    strokeWeight(4)
-    stroke(0, 0, 0, 2)
-    // die Ameisen laufen lassen
+    // make all the ants construct solutions
     for (let i = 0; i < this.ants.length; i++) {
       this.ants[i].constructSolution();
     }
-    // Pheromone von dem Graphen löschen
     this.evaporatePheromones()
-    // Pheromone auf den Graph setzen
+    // figure out best solution
     for (let i = 0; i < this.ants.length; i++) {
       let solution = this.ants[i].getSolution()
       let distance = this.ants[i].getDistance()
@@ -171,6 +194,7 @@ class Graph {
         this.shortestDistance = distance
       }
     }
+    // apply pheromones of the best solution
     let score = (1 / this.shortestDistance)
     for (let i = 0; i < this.bestSolution.length; i++) {
       let s0 = this.bestSolution[i - 1]
@@ -178,81 +202,6 @@ class Graph {
       let prevPherm = this.getPheromone(s0, s1)
       this.setPheromone(s0, s1, prevPherm + score *width* pheromoneWeight)
     }
-    fill(255)
-    rect(10, 10, width - 20, 10)
-    fill(0)
-    text(this.shortestDistance, 20, 20)
-  }
-
-  /** malt die eine Lösung als Striche die die Ecken des Graphen verbinden*/
-  drawSolution(solution) {
-    for (let j = 1; j < solution.length; j++) {
-      let v1 = this.vertices[solution[j - 1]]
-      let v2 = this.vertices[solution[j]]
-      line(v1.x, v1.y, v2.x, v2.y)
-      rect(v2.x - 5, v2.y - 5, 10, 10)
-    }
-  }
-
-  drawAnts() {
-    strokeWeight(1)
-    // die restlichen Lösungen malen
-    stroke(0, 0, 0, 20)
-    for (let i = 0; i < this.ants.length; i++) {
-      let solution = this.ants[i].getSolution()
-      this.drawSolution(solution)
-    }
-  }
-
-  /** malt die beste Lösung der Ameisen als einen Grünen Strich zwischen den
-  * Ecken dese Graphen*/
-  drawBestSolution() {
-    // beste Lösung in grün malen
-    stroke(0, 255, 0)
-    strokeWeight(1)
-    this.drawSolution(this.bestSolution)
-  }
-
-  /**malt die Ecken des Graphen als Kreise mit dem Index der jeweiligen Ecke*/
-  drawVertices() {
-    stroke(0)
-    for (let i = 0; i < this.vertices.length; i++) {
-      let x = this.vertices[i].x
-      let y = this.vertices[i].y
-      if (i == this.startingVertex) {
-        fill(0, 255, 0)
-      } else {
-        fill(255, 255, 255)
-      }
-      strokeWeight(1)
-      ellipse(x, y, VERTEX_RADIUS, VERTEX_RADIUS)
-      fill(0)
-      strokeWeight(0)
-      text(i, x - VERTEX_RADIUS/3, y + VERTEX_RADIUS/4)
-    }
-  }
-
-  /** malt den Graphen mit den Ameisen und der besten Lösung basierent auf den
-  * Einstellungen*/
-  draw() {
-    // Ameisen darstellen
-    if (this.shouldShowAnts) {
-      this.drawAnts()
-    }
-    // beste Lösung darstellen
-    if (this.shouldShowBestSolution) {
-      this.drawBestSolution()
-    }
-    // Ecken darstellen
-    this.drawVertices()
-  }
-
-  setShouldShowAnts(should) {
-    this.shouldShowAnts = should
-  }
-
-  setShouldShowBestSolution(should) {
-    this.shouldShowBestSolution = should
   }
 
 }
