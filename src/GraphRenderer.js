@@ -61,12 +61,20 @@ class GraphRenderer {
     }
   }
 
+  drawBestSolutionValue() {
+    fill(255)
+    rect(10, 10, width - 20, 10)
+    fill(0)
+    text(mainGraph.shortestDistance, 20, 20)
+  }
+
   draw() {
     if (this.shouldDrawSolutions)
       this.drawSolutions()
     if (this.shouldDrawBestSolution)
       this.drawBestSolution()
     this.drawVertices()
+    this.drawBestSolutionValue()
   }
 
 }

@@ -5,6 +5,21 @@ const HEIGHT_MARGIN = 20
 let pheromoneWeight = 0.5
 let evapororationrate = 0.05
 
+class Vector {
+
+  constructor(x, y) {
+      this.x = x
+      this.y = y
+  }
+
+  dist(v) {
+    let dx = v.x - this.x
+    let dy = v.y - this.y
+    return Math.sqrt(dx*dx + dy*dy)
+  }
+
+}
+
 class Graph {
 
   constructor(vertexCount, antCount) {
@@ -84,8 +99,8 @@ class Graph {
   any of the existing vertices */
   addNewVertex() {
     // create a random vector within the margins
-    let newVertex = createVector(random(WIDTH_MARGIN, width - WIDTH_MARGIN),
-                                 random(HEIGHT_MARGIN, height - HEIGHT_MARGIN)
+    let newVertex = new Vector(random(WIDTH_MARGIN, width - WIDTH_MARGIN),
+                               random(HEIGHT_MARGIN, height - HEIGHT_MARGIN)
     )
     // check if the vertex is too close to any other vertices in the graph
     let doesIntersect = false
@@ -164,15 +179,12 @@ class Graph {
   }
 
   update() {
-    strokeWeight(4)
-    stroke(0, 0, 0, 2)
-    // die Ameisen laufen lassen
+    // make all the ants construct solutions
     for (let i = 0; i < this.ants.length; i++) {
       this.ants[i].constructSolution();
     }
-    // Pheromone von dem Graphen löschen
     this.evaporatePheromones()
-    // Pheromone auf den Graph setzen
+    // figure out best solution
     for (let i = 0; i < this.ants.length; i++) {
       let solution = this.ants[i].getSolution()
       let distance = this.ants[i].getDistance()
@@ -182,6 +194,7 @@ class Graph {
         this.shortestDistance = distance
       }
     }
+    // apply pheromones of the best solution
     let score = (1 / this.shortestDistance)
     for (let i = 0; i < this.bestSolution.length; i++) {
       let s0 = this.bestSolution[i - 1]
@@ -189,10 +202,6 @@ class Graph {
       let prevPherm = this.getPheromone(s0, s1)
       this.setPheromone(s0, s1, prevPherm + score *width* pheromoneWeight)
     }
-    fill(255)
-    rect(10, 10, width - 20, 10)
-    fill(0)
-    text(this.shortestDistance, 20, 20)
   }
 
 }

@@ -8,13 +8,13 @@ let shouldReset = false
 let mainGraph
 let mainGraphRenderer
 
-updateVertexCountLabel = function(count) {
-  vertexCountLabel.innerHTML = "Number of Vertices:\t" + count
-}
-
 reset = function() {
   mainGraph = new Graph(newVertexCount, 5)
   mainGraphRenderer.setGraph(mainGraph)
+}
+
+updateVertexCountLabel = function(count) {
+  vertexCountLabel.innerHTML = "Number of Vertices:\t" + count
 }
 
 vertexCountSlider.oninput = function() {

@@ -19,7 +19,7 @@ class WeightedPicker {
       probSum += this.probabilities[i]
     }
     // pick the element
-    let randomNumber = random(0, probSum)
+    let randomNumber = Math.random(0, probSum)
     let prevSum = 0
     for (let i = 0; i < this.probabilities.length; i++) {
       prevSum += this.probabilities[i]
